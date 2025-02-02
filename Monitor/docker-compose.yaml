@@ -1,0 +1,54 @@
+networks:
+  graduation-thesis:
+    external: true
+
+services:
+  # Cấu hình Kafka-exporter container
+  kafka-exporter:
+    image: bitnami/kafka-exporter:latest
+    container_name: kafka-exporter
+    hostname: kafka-exporter
+    networks:
+      graduation-thesis:
+    ports:
+      - 9308:9308
+    command:
+      - "--kafka.server=kafka-broker-1:9093"
+      - "--kafka.server=kafka-broker-2:9094"
+      - "--kafka.server=kafka-broker-3:9095"
+    restart: always
+
+  # Cấu hình Prometheus container
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    hostname: prometheus
+    networks:
+      graduation-thesis:
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    restart: always
+
+  # Cấu hình graphite-exporter container, dùng để giám sát hiệu năng của cụm Spark
+  graphite-exporter:
+    image: prom/graphite-exporter:latest
+    container_name: graphite-exporter
+    hostname: graphite-exporter
+    networks:
+      graduation-thesis:
+    command: "--graphite.mapping-config=/tmp/graphite_mapping.conf"
+    volumes:
+      - ./graphite/graphite_mapping.conf:/tmp/graphite_mapping.conf
+    ports:
+      - "9108:9108"
+      - "9109:9109"
+      - "9109:9109/udp"  
+    restart: always
+    
+volumes:
+  prometheus_data:

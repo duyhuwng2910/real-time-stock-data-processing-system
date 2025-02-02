@@ -1,0 +1,449 @@
+version: "3"
+
+networks:
+  graduation-thesis:
+    external: true
+
+services:
+  kafka-controller-1:
+    image: confluentinc/cp-server:latest
+    container_name: kafka-controller-1
+    hostname: kafka-controller-1
+    networks:
+      - graduation-thesis
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_PROCESS_ROLES: 'controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka-controller-1:9092,2@kafka-controller-2:9092,3@kafka-controller-3:9092'
+      KAFKA_LISTENERS: 'CONTROLLER://kafka-controller-1:9092'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LOG_DIRS: '/tmp/kraft-logs'
+      CLUSTER_ID: 'nguyeexnduyhuwng291002'
+
+  kafka-controller-2:
+    image: confluentinc/cp-server:latest
+    container_name: kafka-controller-2
+    hostname: kafka-controller-2
+    networks:
+      - graduation-thesis
+    depends_on:
+      - kafka-controller-1
+    ports:
+      - "19092:9092"
+    environment:
+      KAFKA_NODE_ID: 2
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_PROCESS_ROLES: 'controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka-controller-1:9092,2@kafka-controller-2:9092,3@kafka-controller-3:9092'
+      KAFKA_LISTENERS: 'CONTROLLER://kafka-controller-2:9092'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LOG_DIRS: '/tmp/kraft-logs'
+      CLUSTER_ID: 'nguyeexnduyhuwng291002'
+
+  kafka-controller-3:
+    image: confluentinc/cp-server:latest
+    container_name: kafka-controller-3
+    hostname: kafka-controller-3
+    networks:
+      - graduation-thesis
+    depends_on:
+      - kafka-controller-1
+      - kafka-controller-2
+    ports:
+      - "29092:9092"
+    environment:
+      KAFKA_NODE_ID: 3
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_PROCESS_ROLES: 'controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka-controller-1:9092,2@kafka-controller-2:9092,3@kafka-controller-3:9092'
+      KAFKA_LISTENERS: 'CONTROLLER://kafka-controller-3:9092'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LOG_DIRS: '/tmp/kraft-logs'
+      CLUSTER_ID: 'nguyeexnduyhuwng291002'
+
+  kafka-broker-1:
+    image: confluentinc/cp-server:latest
+    container_name: kafka-broker-1
+    hostname: kafka-broker-1
+    networks:
+      - graduation-thesis
+    ports:
+      - '9093:9093'
+      - '29093:29093'
+    environment:
+      KAFKA_NODE_ID: 4
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'BROKER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka-broker-1:9093,EXTERNAL://localhost:29093'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_PROCESS_ROLES: 'broker'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka-controller-1:9092,2@kafka-controller-2:9092,3@kafka-controller-3:9092'
+      KAFKA_LISTENERS: 'PLAINTEXT://:9093,EXTERNAL://:29093'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'BROKER'
+      KAFKA_LOG_DIRS: '/tmp/kraft-logs'
+      CLUSTER_ID: 'nguyeexnduyhuwng291002'
+      MAX_HEAP_SIZE: 1024M
+
+  kafka-broker-2:
+    image: confluentinc/cp-server:latest
+    container_name: kafka-broker-2
+    hostname: kafka-broker-2
+    networks:
+      - graduation-thesis
+    depends_on:
+      - kafka-broker-1
+    ports:
+      - '9094:9094'
+      - '29094:29094'
+    environment:
+      KAFKA_NODE_ID: 5
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'BROKER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka-broker-2:9094,EXTERNAL://localhost:29094'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_PROCESS_ROLES: 'broker'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka-controller-1:9092,2@kafka-controller-2:9092,3@kafka-controller-3:9092'
+      KAFKA_LISTENERS: 'PLAINTEXT://:9094,EXTERNAL://:29094'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'BROKER'
+      KAFKA_LOG_DIRS: '/tmp/kraft-logs'
+      CLUSTER_ID: 'nguyeexnduyhuwng291002'
+      MAX_HEAP_SIZE: 1024M
+
+  kafka-broker-3:
+    image: confluentinc/cp-server:latest
+    container_name: kafka-broker-3
+    hostname: kafka-broker-3
+    networks:
+      - graduation-thesis
+    depends_on:
+      - kafka-broker-1
+      - kafka-broker-2
+    ports:
+      - '9095:9095'
+      - '29095:29095'
+    environment:
+      KAFKA_NODE_ID: 6
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'BROKER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka-broker-3:9095,EXTERNAL://localhost:29095'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_PROCESS_ROLES: 'broker'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka-controller-1:9092,2@kafka-controller-2:9092,3@kafka-controller-3:9092'
+      KAFKA_LISTENERS: 'PLAINTEXT://:9095,EXTERNAL://:29095'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'BROKER'
+      KAFKA_LOG_DIRS: '/tmp/kraft-logs'
+      CLUSTER_ID: 'nguyeexnduyhuwng291002'
+      MAX_HEAP_SIZE: 1024M
+
+  kafka-broker-4:
+    image: confluentinc/cp-server:latest
+    container_name: kafka-broker-4
+    hostname: kafka-broker-4
+    networks:
+      - graduation-thesis
+    depends_on:
+      - kafka-broker-1
+      - kafka-broker-2
+      - kafka-broker-3
+    ports:
+      - '9096:9096'
+      - '29096:29096'
+    environment:
+      KAFKA_NODE_ID: 6
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'BROKER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka-broker-3:9096,EXTERNAL://localhost:29096'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_PROCESS_ROLES: 'broker'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka-controller-1:9092,2@kafka-controller-2:9092,3@kafka-controller-3:9092'
+      KAFKA_LISTENERS: 'PLAINTEXT://:9096,EXTERNAL://:29096'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'BROKER'
+      KAFKA_LOG_DIRS: '/tmp/kraft-logs'
+      CLUSTER_ID: 'nguyeexnduyhuwng291002'
+      MAX_HEAP_SIZE: 1024M
+
+  # Dịch vụ Schema Registry
+  schema-registry:
+    image: confluentinc/cp-schema-registry:latest
+    container_name: schema-registry
+    hostname: schema-registry
+    networks:
+      - graduation-thesis
+    depends_on:
+      - kafka-controller-1
+      - kafka-controller-2
+      - kafka-controller-3
+      - kafka-broker-1
+      - kafka-broker-2
+      - kafka-broker-3
+      - kafka-broker-4
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka-broker-1:9093,kafka-broker-2:9094,kafka-broker-3:9095,kafka-broker-4:9096'
+      MAX_HEAP_SIZE: 1024M
+
+  # Dịch vụ Control Center
+  control-center:
+    image: confluentinc/cp-enterprise-control-center:latest
+    container_name: control-center
+    hostname: control-center
+    networks:
+      - graduation-thesis
+    depends_on:
+      - kafka-controller-1
+      - kafka-controller-2
+      - kafka-controller-3
+      - kafka-broker-1
+      - kafka-broker-2
+      - kafka-broker-3
+      - kafka-broker-4
+      - schema-registry
+    ports:
+      - "9021:9021"
+    environment:
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: 'kafka-broker-1:9093,kafka-broker-2:9094,kafka-broker-3:9095,kafka-broker-4:9096'
+      CONTROL_CENTER_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
+      CONTROL_CENTER_REPLICATION_FACTOR: 1
+      CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
+      CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
+      MAX_HEAP_SIZE: 1024M
+
+  # Cấu hình Spark containers
+  spark-master:
+    image: bitnami/spark:latest
+    container_name: spark-master
+    hostname: spark-master
+    networks:
+      - graduation-thesis
+    ports:
+      - '8080:8080'
+      - '7077:7077'
+      - '4040:4040'
+    environment:
+      - SPARK_MODE=master
+      - SPARK_MASTER_PORT=7077
+      - SPARK_MASTER_WEBUI_PORT=8080
+      - SPARK_DAEMON_MEMORY=1G
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+      - SPARK_USER=spark
+      - SPARK_METRICS_ENABLED=true
+    volumes:
+      - ./Spark/consumer.py:/opt/bitnami/spark/consumer.py
+      - ./Spark/dev/consumer.py:/opt/bitnami/spark/consumer_test.py
+      - spark_master:/bitnami
+
+  spark-worker-1:
+    image: bitnami/spark:latest
+    container_name: spark-worker-1
+    hostname: spark-worker-1
+    networks:
+      - graduation-thesis
+    depends_on:
+      - spark-master
+    ports:
+      - '18080:8080'
+      - '4041:4040'
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_MEMORY=1G
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_WEBUI_PORT=4040
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+      - SPARK_USER=spark
+      - SPARK_METRICS_ENABLED=true
+    volumes:
+      - ./Spark/consumer.py:/opt/bitnami/spark/consumer.py
+      - ./Spark/dev/consumer.py:/opt/bitnami/spark/consumer_test.py
+      - spark_worker_1:/bitnami
+
+  spark-worker-2:
+    image: bitnami/spark:latest
+    container_name: spark-worker-2
+    hostname: spark-worker-2
+    networks:
+      - graduation-thesis
+    depends_on:
+      - spark-master
+      - spark-worker-1
+    ports:
+      - '28080:8080'
+      - '4042:4040'
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_MEMORY=1G
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_WEBUI_PORT=4040
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+      - SPARK_USER=spark
+      - SPARK_METRICS_ENABLED=true
+    volumes:
+      - ./Spark/consumer.py:/opt/bitnami/spark/consumer.py
+      - ./Spark/dev/consumer.py:/opt/bitnami/spark/consumer_test.py
+      - spark_worker_2:/bitnami
+
+  # Cấu hình MySQL container
+  mysql:
+    image: mysql:8.0.36
+    container_name: mysql
+    hostname: mysql
+    networks:
+      - graduation-thesis
+    ports:
+      - '3306:3306'
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: --max_allowed_packet=268425456
+    environment:
+      - MYSQL_DATABASE=vietnam_stock
+      - MYSQL_ROOT_PASSWORD=root
+
+  # Cấu hình cụm Cassandra
+  cassandra-1:
+    image: cassandra:latest
+    container_name: cassandra-1
+    hostname: cassandra-1
+    networks:
+      - graduation-thesis
+    ports:
+      - '9042:9042'
+    volumes:
+      - cassandra_1:/var/lib/cassandra
+    environment:
+      - CASSANDRA_SEEDS=cassandra-1,cassandra-2,cassandra-3
+      - CASSANDRA_CLUSTER_NAME=cassandra-cluster
+      - CASSANDRA_DC=DC1
+      - CASSANDRA_RACK=RACK1
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - HEAP_NEWSIZE=128M
+      - MAX_HEAP_SIZE=1024M
+      - CLIENT_TIMEOUT=20
+
+  cassandra-2:
+    image: cassandra:latest
+    container_name: cassandra-2
+    hostname: cassandra-2
+    networks:
+      - graduation-thesis
+    depends_on:
+      - cassandra-1
+    ports:
+      - '9043:9042'
+    volumes:
+      - cassandra_2:/var/lib/cassandra
+    environment:
+      - CASSANDRA_SEEDS=cassandra-1,cassandra-2,cassandra-3
+      - CASSANDRA_CLUSTER_NAME=cassandra-cluster
+      - CASSANDRA_DC=DC1
+      - CASSANDRA_RACK=RACK1
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - HEAP_NEWSIZE=128M
+      - MAX_HEAP_SIZE=1024M
+      - CLIENT_TIMEOUT=20
+
+  cassandra-3:
+    image: cassandra:latest
+    container_name: cassandra-3
+    hostname: cassandra-3
+    networks:
+      - graduation-thesis
+    depends_on:
+      - cassandra-1
+      - cassandra-2
+    ports:
+      - '9044:9042'
+    volumes:
+      - cassandra_3:/var/lib/cassandra
+    environment:
+      - CASSANDRA_SEEDS=cassandra-1,cassandra-2,cassandra-3
+      - CASSANDRA_CLUSTER_NAME=cassandra-cluster
+      - CASSANDRA_DC=DC2
+      - CASSANDRA_RACK=RACK1
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - HEAP_NEWSIZE=128M
+      - MAX_HEAP_SIZE=1024M
+      - CLIENT_TIMEOUT=20
+
+  # Cấu hình Grafana container
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    networks:
+      - graduation-thesis
+    ports:
+      - '3000:3000'
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_LOG_LEVEL=debug
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_BASIC_ENABLED=false
+      - GF_DEFAULT_APP_MODE=development
+
+volumes:
+  spark_master:
+  spark_worker_1:
+  spark_worker_2:
+  mysql_data:
+  cassandra_1:
+  cassandra_2:
+  cassandra_3:
+  grafana_data:

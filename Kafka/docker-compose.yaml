@@ -1,0 +1,174 @@
+networks:
+  graduation-thesis:
+    external: true
+
+services:
+  kafka-controller-1:
+    image: confluentinc/cp-server:latest
+    container_name: kafka-controller-1
+    hostname: kafka-controller-1
+    networks:
+      - graduation-thesis
+    ports:
+      - "9092:9092"
+      - "9101:9101"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT'
+      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+      KAFKA_CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: 'kafka-controller-1:9092'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_PROCESS_ROLES: 'controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka-controller-1:9092'
+      KAFKA_LISTENERS: 'CONTROLLER://kafka-controller-1:9092'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LOG_DIRS: '/tmp/kraft-logs'
+      CLUSTER_ID: 'nguyeexnduyhuwng291002'
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    restart: always
+
+  kafka-broker-1:
+    image: confluentinc/cp-server:latest
+    hostname: kafka-broker-1
+    container_name: kafka-broker-1
+    networks:
+      - graduation-thesis
+    ports:
+      - '9093:9093'
+      - '29093:29093'
+      - '9103:9101'
+    environment:
+      KAFKA_NODE_ID: 2
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'BROKER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka-broker-1:9093,EXTERNAL://localhost:29093'
+      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+      KAFKA_CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: 'kafka-broker-1:9093'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_PROCESS_ROLES: 'broker'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka-controller-1:9092'
+      KAFKA_LISTENERS: 'PLAINTEXT://:9093,EXTERNAL://:29093'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'BROKER'
+      KAFKA_LOG_DIRS: '/tmp/kraft-logs'
+      CLUSTER_ID: 'nguyeexnduyhuwng291002'
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+    restart: always
+
+  kafka-broker-2:
+    image: confluentinc/cp-server:latest
+    hostname: kafka-broker-2
+    container_name: kafka-broker-2
+    networks:
+      - graduation-thesis
+    depends_on:
+      - kafka-broker-1
+    ports:
+      - '9094:9094'
+      - '29094:29094'
+      - '9104:9101'
+    environment:
+      KAFKA_NODE_ID: 3
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'BROKER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka-broker-2:9094,EXTERNAL://localhost:29094'
+      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+      KAFKA_CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: 'kafka-broker-2:9094'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_PROCESS_ROLES: 'broker'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka-controller-1:9092'
+      KAFKA_LISTENERS: 'PLAINTEXT://kafka-broker-2:9094,EXTERNAL://:29094'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'BROKER'
+      KAFKA_LOG_DIRS: '/tmp/kraft-logs'
+      CLUSTER_ID: 'nguyeexnduyhuwng291002'
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+    restart: always
+
+  kafka-broker-3:
+    image: confluentinc/cp-server:latest
+    hostname: kafka-broker-3
+    container_name: kafka-broker-3
+    networks:
+      - graduation-thesis
+    depends_on:
+      - kafka-broker-1
+      - kafka-broker-2
+    ports:
+      - '9095:9095'
+      - '29095:29095'
+      - '9105:9101'
+    environment:
+      KAFKA_NODE_ID: 4
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'BROKER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka-broker-3:9095,EXTERNAL://localhost:29095'
+      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+      KAFKA_CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: 'kafka-broker-3:9095'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_PROCESS_ROLES: 'broker'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka-controller-1:9092'
+      KAFKA_LISTENERS: 'PLAINTEXT://kafka-broker-3:9095,EXTERNAL://:29095'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'BROKER'
+      KAFKA_LOG_DIRS: '/tmp/kraft-logs'
+      CLUSTER_ID: 'nguyeexnduyhuwng291002'
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+    restart: always
+
+  # Dịch vụ Control Center
+  control-center:
+    image: confluentinc/cp-enterprise-control-center:latest
+    container_name: control-center
+    hostname: control-center
+    networks:
+      - graduation-thesis
+    depends_on:
+      - kafka-controller-1
+      - kafka-broker-1
+      - kafka-broker-2
+      - kafka-broker-3
+    ports:
+      - "9021:9021"
+    environment:
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: 'kafka-broker-1:9093,kafka-broker-2:9094,kafka-broker-3:9095'
+      CONTROL_CENTER_REPLICATION_FACTOR: 1
+      CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
+      CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
+      CONFLUENT_METRICS_TOPIC_REPLICATION: 1
+      PORT: 9021
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+    restart: always
