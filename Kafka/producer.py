@@ -1,6 +1,9 @@
 import time
 import json
+import six
 import sys
+if sys.version_info >= (3, 12, 0):
+    sys.modules['kafka.vendor.six.moves'] = six.moves
 
 import pandas as pd
 
@@ -15,16 +18,17 @@ from kafka import KafkaProducer
 from sqlalchemy import create_engine
 
 from cassandra.cluster import Cluster
+from cassandra.io.libevreactor import LibevConnection
 
 # Uncomment if you use Windows
-# sys.path.append(r'W:/Study/UET/Graduation Thesis/Real-time-stock-data-processing-system/SSI')
+sys.path.append(r'D:/Code/real-time-stock-data-processing-system/SSI')
 
 # Uncomment if you use Ubuntu
-sys.path.append(r'/home/nguyenduyhung/graduation_thesis/Real-Time-Stock-Data-Processing-System/SSI')
+# sys.path.append(r'/home/nguyenduyhung/graduation_thesis/Real-Time-Stock-Data-Processing-System/SSI')
 
 import config
 
-bootstrap_servers = ['localhost:29093', 'localhost:29094', 'localhost:29095']
+bootstrap_servers = ['localhost:29093', 'localhost:29094']
 
 producer = KafkaProducer(bootstrap_servers=bootstrap_servers,
                          value_serializer=lambda x: json.dumps(x).encode('utf-8'))
@@ -34,6 +38,7 @@ client = MarketDataClient(config)
 vnstock_client = client = vnstock_data.ssi.fc_md_client.MarketDataClient(config)
 
 cluster = Cluster(['localhost'], port=9042)
+cluster.connection_class = LibevConnection
 
 session = cluster.connect()
 
@@ -78,18 +83,18 @@ def insert_ticker_list(ticker_df):
 
 def main():
     print("Starting extracting real time stock trading data...")
-    
+
     time.sleep(2)
-    
+
     stream = MarketDataStream(config, MarketDataClient(config))
-    
+
     # ticker = input("Please type the ticker you want to extract real time data:")
 
     # Return the data of ticker list in VN30
-    # ticker_df = vnstock_data.ssi.get_index_component(client, config, index='VN30', page=1, pageSize=100)
-        
+    ticker_df = vnstock_data.ssi.get_index_component(client, config, index='VN30', page=1, pageSize=100)
+
     # Return the data of ticker list in VN100
-    ticker_df = vnstock_data.ssi.get_index_component(client, config, index='VN100', page=1, pageSize=100)
+    # ticker_df = vnstock_data.ssi.get_index_component(client, config, index='VN100', page=1, pageSize=100)
 
     ticker_df = ticker_df.rename(columns={"StockSymbol": "ticker"})
 
@@ -115,23 +120,23 @@ def main():
     insert_ticker_list(ticker_df)
 
     ticker_string = 'B:' + ticker_list[0]
-    
+
     for i in range(1, len(ticker_list), 1):
         ticker_string += '-' + ticker_list[i]
-    
+
     try:
         stream.start(get_market_data, get_error, ticker_string)
 
         message = None
-    
+
         while message != "exit()":
             message = input()
-    
+
             if message is not None and message != "" and message != "exit()":
                 stream.swith_channel(message)
 
     except Exception as e:
         print(f"Error here: {e}")
-        
-        
+
+
 main()

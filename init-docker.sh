@@ -1,4 +1,4 @@
-docker network create graduation-thesis
+docker network create vietnam-stock
 
 #
 # If you want to run without monitoring
